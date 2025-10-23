@@ -2,9 +2,21 @@ import requests
 import base64
 import wave
 import os
+import argparse
 from dotenv import load_dotenv
 
+PROMPT = """
+Make Speaker1 is young and Speaker2 is old.
+Speaker1: Chào mừng quý vị và các bạn đã quay trở lại với kênh podcast "Kết Nối Thế Hệ", nơi chúng ta cùng nhau chia sẻ và lắng nghe những câu chuyện giúp thu hẹp khoảng cách giữa các thế hệ trong gia đình.
+Speaker2: Chào cháu Hoàng, chào quý vị thính giả. Nghe bác Hùng nói mà tôi thấy thương quá, y hệt như mình vậy. Câu chuyện của tôi thì không phải là đi khám bệnh, mà là với cái định danh điện tử VNeID.
+"""
+
 load_dotenv()
+
+# Set up argument parser
+parser = argparse.ArgumentParser(description="Generate audio from text using a multi-speaker TTS API.")
+parser.add_argument("-o", "--output", default="./voice/output/multiple_speakers.wav", help="Output audio file path (default: ./voice/output/multiple_speakers.wav)")
+args = parser.parse_args()
 
 # Load the API key from the environment variable
 API_KEY = os.getenv("API_KEY")
@@ -22,7 +34,7 @@ else:
     data = {
       "contents": [{
         "parts": [
-          {"text": "Make Speaker1 sound tired and bored, and Speaker2 sound excited and happy:\nSpeaker1: So... what's on the agenda today?\nSpeaker2: You're never going to guess!"}
+          {"text": PROMPT}
         ]
       }],
       "generationConfig": {
@@ -58,12 +70,12 @@ else:
 
         # The mime_type is "audio/L16;codec=pcm;rate=24000", which means raw PCM audio.
         # We'll save it as a WAV file.
-        with wave.open("./voice/output/multiple_speakers.wav", "wb") as wav_file:
+        with wave.open(args.output, "wb") as wav_file:
             wav_file.setnchannels(1)  # Mono
             wav_file.setsampwidth(2)  # 16-bit PCM (L16)
             wav_file.setframerate(24000)
             wav_file.writeframes(audio_data)
-            print("Audio content written to file 'voice/output/multiple_speakers.wav'")
+            print(f"Audio content written to file '{args.output}'")
     else:
         print(f"Request failed with status code {response.status_code}")
         print(response.text)
