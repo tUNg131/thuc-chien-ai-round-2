@@ -5,18 +5,17 @@ import os
 import argparse
 from dotenv import load_dotenv
 
-PROMPT = """
-Make Speaker1 is young and Speaker2 is old.
-Speaker1: Chào mừng quý vị và các bạn đã quay trở lại với kênh podcast "Kết Nối Thế Hệ", nơi chúng ta cùng nhau chia sẻ và lắng nghe những câu chuyện giúp thu hẹp khoảng cách giữa các thế hệ trong gia đình.
-Speaker2: Chào cháu Hoàng, chào quý vị thính giả. Nghe bác Hùng nói mà tôi thấy thương quá, y hệt như mình vậy. Câu chuyện của tôi thì không phải là đi khám bệnh, mà là với cái định danh điện tử VNeID.
-"""
-
 load_dotenv()
 
 # Set up argument parser
 parser = argparse.ArgumentParser(description="Generate audio from text using a multi-speaker TTS API.")
 parser.add_argument("-o", "--output", default="./voice/output/multiple_speakers.wav", help="Output audio file path (default: ./voice/output/multiple_speakers.wav)")
+parser.add_argument("-i", "--input", default="content.txt", help="Input text file (default: content.txt)")
 args = parser.parse_args()
+
+# Read prompt from input file
+with open(args.input, "r", encoding="utf-8") as f:
+    PROMPT = f.read()
 
 # Load the API key from the environment variable
 API_KEY = os.getenv("API_KEY")
@@ -24,7 +23,7 @@ API_KEY = os.getenv("API_KEY")
 if not API_KEY:
     print("API_KEY not found in .env file. Please create a .env file and add your API key.")
 else:
-    url = "https://api.thucchien.ai/gemini/v1beta/models/gemini-2.5-flash-preview-tts:generateContent"
+    url = "https://api.thucchien.ai/gemini/v1beta/models/gemini-2.5-pro-preview-tts:generateContent"
 
     headers = {
         "x-goog-api-key": API_KEY,
@@ -45,14 +44,14 @@ else:
                   "speaker": "Speaker1",
                   "voiceConfig": {
                     "prebuiltVoiceConfig": {
-                      "voiceName": "Kore"
+                      "voiceName": "sulafat"
                     }
                   }
                 }, {
                   "speaker": "Speaker2",
                   "voiceConfig": {
                     "prebuiltVoiceConfig": {
-                      "voiceName": "Puck"
+                      "voiceName": "gacrux"
                     }
                   }
                 }]
@@ -61,7 +60,7 @@ else:
       }
     }
 
-    response = requests.post(url, headers=headers, json=data)
+    response = requests.post(url, headers=headers, json=data, timeout=1000)
 
     if response.status_code == 200:
         response_json = response.json()
